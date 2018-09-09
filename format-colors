@@ -28,12 +28,19 @@ def parse_files(*files):
     if ident[0].isdigit():
       ident = '_' + ident
     return ident.lower()
+  def hsl(hs,ss,ls):
+    h = re.sub('[^0-9]*', '', hs)
+    if len(h) == 0: h = '0'
+    s = re.sub('[^0-9]*', '', ss)
+    l = re.sub('[^0-9]*', '', ls)
+    return int(h), int(s), int(l)
   def split_line(line):
     fields = line.split('\t')
     return (make_identifier(fields[0]),
             fields[0],
             simplify_hex_color(fields[1]),
-            hex_to_rgb_triplet(fields[1]))
+            hex_to_rgb_triplet(fields[1]),
+            hsl(fields[5], fields[6], fields[7]))
   def process_line(line):
     if len(line) > 0 and line[0].isspace(): return line.strip()
     else: return ''
@@ -51,7 +58,8 @@ def parse_files(*files):
     out_dict[line[0].strip()] = {
       "name": line[1].strip().title(),
       "hex": line[2].lower().strip(),
-      "rgb": line[3]
+      "rgb": line[3],
+      "hsl": line[4]
     }
 
   return out_dict
@@ -64,6 +72,7 @@ def to_json(color_dict):
     code += indent*2 +   '"name": "%s",\n' % v["name"]
     code += indent*2 +   '"hex": "%s",\n' % v["hex"]
     code += indent*2 +   '"rgb": [%d, %d, %d],\n' % v["rgb"]
+    code += indent*2 +   '"hsl": [%d, %d, %d]\n' % v["hsl"]
     code += indent + '},\n'
   code += '}\n'
   return code
